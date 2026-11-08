@@ -243,7 +243,7 @@ const I18N = {
     step2: "2. Druckplatte", width: "Breite (Zoll)", length: "Länge (Zoll)", printer: "Druckplatte (längste Seite)", eg: "z. B.",
     plateCheck: "Bitte die Größe deiner Druckplatte vorher prüfen. Die hier gemachten Angaben können von der tatsächlichen Größe abweichen. Sollte dein Drucker nicht aufgeführt sein, wähle einfach die passende Plattengröße aus der Liste – oder wähle „Eigene Plattengröße“ und trage die Größe im dafür vorgesehenen Feld manuell ein.",
     customPlate: "Längere Plattenseite (mm)", customPrinter: "Eigene Plattengröße …",
-    maxInfo: (s, mm) => `Größtes Teil für diese Druckplatte (gerade ausgerichtet): ${s}" (${mm} mm)`,
+    maxInfo: (s, mm, gap) => `Größtes Teil für diese Druckplatte (gerade ausgerichtet): ${s}" (${mm} mm) – inkl. ${gap} mm Freiraum umlaufend um das Teil`,
     noFit: "Auf diese Druckplatte passt kein Teil.",
     step3: "3. Ergebnis", side: len => `${len}"-Seiten:`, corner: "Ecke", noPieces: "keine Zwischenteile",
     impossible: list => `nicht möglich – die Länge minus 6" muss sich aus ${list} zusammensetzen lassen (gerade Zahl, mind. 10")`,
@@ -283,7 +283,7 @@ const I18N = {
     step2: "2. Build plate", width: "Width (inches)", length: "Length (inches)", printer: "Build plate (longest side)", eg: "e.g.",
     plateCheck: "Please check the size of your build plate first. The information given here may differ from the actual size. If your printer isn't listed, simply pick the matching plate size from the list – or choose “Custom bed size” and enter the size manually in the field that appears.",
     customPlate: "Longer bed side (mm)", customPrinter: "Custom bed size …",
-    maxInfo: (s, mm) => `Largest piece for this build plate (placed straight): ${s}" (${mm} mm)`,
+    maxInfo: (s, mm, gap) => `Largest piece for this build plate (placed straight): ${s}" (${mm} mm) – includes ${gap} mm of free space all around the piece`,
     noFit: "No piece fits on this build plate.",
     step3: "3. Result", side: len => `${len}" sides:`, corner: "Corner", noPieces: "no middle pieces",
     impossible: list => `not possible – the length minus 6" must be made up of ${list} (even number, min. 10")`,
@@ -323,7 +323,7 @@ const I18N = {
     step2: "2. Plateau d'impression", width: "Largeur (pouces)", length: "Longueur (pouces)", printer: "Plateau (côté le plus long)", eg: "p. ex.",
     plateCheck: "Vérifie d'abord la taille de ton plateau d'impression. Les indications données ici peuvent différer de la taille réelle. Si ton imprimante n'est pas listée, choisis simplement la taille de plateau correspondante dans la liste – ou choisis « Taille de plateau personnalisée » et saisis la taille manuellement dans le champ prévu.",
     customPlate: "Côté le plus long du plateau (mm)", customPrinter: "Taille de plateau personnalisée …",
-    maxInfo: (s, mm) => `Plus grande pièce pour ce plateau (posée droite) : ${s}" (${mm} mm)`,
+    maxInfo: (s, mm, gap) => `Plus grande pièce pour ce plateau (posée droite) : ${s}" (${mm} mm) – ${gap} mm d'espace libre tout autour de la pièce inclus`,
     noFit: "Aucune pièce ne tient sur ce plateau d'impression.",
     step3: "3. Résultat", side: len => `Côtés de ${len}" :`, corner: "Coin", noPieces: "aucune pièce intermédiaire",
     impossible: list => `impossible – la longueur moins 6" doit pouvoir être composée de ${list} (nombre pair, min. 10")`,
@@ -363,7 +363,7 @@ const I18N = {
     step2: "2. Piatto di stampa", width: "Larghezza (pollici)", length: "Lunghezza (pollici)", printer: "Piatto (lato più lungo)", eg: "ad es.",
     plateCheck: "Controlla prima la dimensione del tuo piatto di stampa. Le indicazioni qui riportate possono differire dalla dimensione reale. Se la tua stampante non è elencata, scegli semplicemente la dimensione del piatto corrispondente dall'elenco – oppure scegli “Dimensione piatto personalizzata” e inserisci la misura manualmente nell'apposito campo.",
     customPlate: "Lato maggiore del piatto (mm)", customPrinter: "Dimensione piatto personalizzata …",
-    maxInfo: (s, mm) => `Pezzo più grande per questo piatto (posizionato dritto): ${s}" (${mm} mm)`,
+    maxInfo: (s, mm, gap) => `Pezzo più grande per questo piatto (posizionato dritto): ${s}" (${mm} mm) – incl. ${gap} mm di spazio libero tutto attorno al pezzo`,
     noFit: "Nessun pezzo entra in questo piatto di stampa.",
     step3: "3. Risultato", side: len => `Lati da ${len}":`, corner: "Angolo", noPieces: "nessun pezzo intermedio",
     impossible: list => `non possibile – la lunghezza meno 6" deve poter essere composta da ${list} (numero pari, min. 10")`,
@@ -403,7 +403,7 @@ const I18N = {
     step2: "2. Cama de impresión", width: "Ancho (pulgadas)", length: "Largo (pulgadas)", printer: "Cama (lado más largo)", eg: "p. ej.",
     plateCheck: "Comprueba antes el tamaño de tu cama de impresión. Los datos indicados aquí pueden diferir del tamaño real. Si tu impresora no aparece, elige simplemente el tamaño de cama correspondiente de la lista, o elige “Tamaño de cama personalizado” e introduce la medida manualmente en el campo correspondiente.",
     customPlate: "Lado más largo de la cama (mm)", customPrinter: "Tamaño de cama personalizado …",
-    maxInfo: (s, mm) => `Pieza más grande para esta cama (colocada recta): ${s}" (${mm} mm)`,
+    maxInfo: (s, mm, gap) => `Pieza más grande para esta cama (colocada recta): ${s}" (${mm} mm) – incl. ${gap} mm de espacio libre alrededor de toda la pieza`,
     noFit: "Ninguna pieza cabe en esta cama de impresión.",
     step3: "3. Resultado", side: len => `Lados de ${len}":`, corner: "Esquina", noPieces: "sin piezas intermedias",
     impossible: list => `no es posible: la longitud menos 6" debe poder formarse con ${list} (número par, mín. 10")`,
@@ -636,16 +636,16 @@ function render() {
   $("customWrap").hidden = !plateChosen || PRINTERS[$("printer").value].plate !== null;
   saveToUrl();
 
+  const manual = $("maxPiece").value !== "";
+  const allowed = plateChosen || manual ? allowedPieces() : [];
+  $("maxInfo").textContent = allowed.length
+    ? T()[manual ? "maxInfoManual" : "maxInfo"](allowed[0], PIECE_MM[allowed[0]].toFixed(1), PRINT_MARGIN_MM / 2)
+    : "";
+
   if (!plateChosen || !boards.length) {
-    $("maxInfo").textContent = "";
     result.append(el("p", { className: "empty", textContent: T().selectPrompt }));
     return;
   }
-
-  const allowed = allowedPieces();
-  $("maxInfo").textContent = allowed.length
-    ? T()[$("maxPiece").value ? "maxInfoManual" : "maxInfo"](allowed[0], PIECE_MM[allowed[0]].toFixed(1))
-    : "";
 
   if (allowed.length === 0) {
     result.append(el("p", { className: "error", textContent: T().noFit }));
