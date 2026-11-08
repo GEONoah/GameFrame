@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GameFrame Calculator</title>
+<style>
+  :root {
+    --bg: #15171a; --panel: #1f2226; --line: #33373d; --text: #e8e8e8;
+    --muted: #9aa0a6; --accent: #00ae42; --corner: #f39c12;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; font-family: system-ui, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--text); }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { margin: 0 0 4px; font-size: 1.6rem; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .top select { min-width: 0; }
+  .top .link-btn { padding: 0 10px; font-size: 1rem; }
+  .top .link-btn, .top select { height: 40px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  h2 { margin: 0 0 12px; font-size: 1.05rem; }
+  .games { columns: 220px; column-gap: 8px; }
+  .games button {
+    text-align: left; background: #262a2f; color: var(--text); border: 1px solid var(--line);
+    border-radius: 8px; padding: 10px 12px; cursor: pointer; font: inherit; width: 100%;
+    display: block; break-inside: avoid; margin-bottom: 8px;
+  }
+  .games button:hover { border-color: var(--accent); }
+  .games button.active { border-color: var(--accent); background: #1d3326; }
+  .games .size { font-size: 1.1rem; font-weight: 600; }
+  .games ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: .88rem; }
+  .games li span { color: #6f757b; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .toolbar input { flex: 1 1 220px; }
+  .empty { color: var(--muted); }
+  .inputs { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
+  label { display: flex; flex-direction: column; gap: 4px; font-size: .9rem; color: var(--muted); min-width: 0; max-width: 100%; }
+  #printer { max-width: 100%; }
+  input, select {
+    background: #262a2f; color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+    padding: 8px 10px; font: inherit; min-width: 120px;
+  }
+  .error { color: #ff6b6b; }
+  table { width: 100%; border-collapse: collapse; }
+  td, th { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+  th { color: var(--muted); font-weight: 500; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.center, th.center { text-align: center; }
+  table.progress-table { table-layout: fixed; }
+  table.progress-table th:first-child { width: 31%; }
+  table.progress-table th:not(:first-child), table.progress-table td:not(:first-child) { text-align: center; }
+  .total td { font-weight: 600; border-bottom: none; }
+  .progress { height: 8px; background: #262a2f; border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--accent); transition: width .4s ease; }
+  .stepper { display: inline-flex; align-items: center; gap: 4px; }
+  .stepper button { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--line); background: #262a2f; color: var(--text); cursor: pointer; font: inherit; line-height: 1; }
+  .stepper button:hover { border-color: var(--accent); }
+  input.count { width: 56px; min-width: 0; padding: 4px 6px; text-align: center; }
+  tr.complete td { color: var(--accent); }
+  tr.complete td:first-child::after { content: " ✓"; }
+  .side { margin: 4px 0; }
+  .side b { display: inline-block; min-width: 110px; }
+  svg { width: 100%; height: auto; display: block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: .85rem; color: var(--muted); margin-top: 8px; }
+  .legend span::before, .swatch { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+  .note { font-size: .85rem; color: var(--muted); margin-top: 8px; }
+  .note.error { color: #ff6b6b; }
+  .promo { border-color: var(--accent); background: linear-gradient(135deg, #1d2a22, var(--panel) 70%); }
+  .promo { display: flow-root; }
+  .promo-visual { float: right; width: min(42%, 300px); margin: 0 0 0 20px; padding: 12px; border: 1px solid var(--line); border-radius: 10px;
+    background-color: #14171a; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 14px 14px; box-shadow: inset 0 0 24px rgba(0,0,0,.5); }
+  .promo-visual img { display: block; width: 100%; height: auto; }
+  .promo-visual .promo-photo { margin-top: 10px; border-radius: 6px; }
+  .promo-visual figcaption { margin-top: 6px; text-align: center; font-size: .75rem; letter-spacing: .04em; color: var(--muted); }
+  @media (max-width: 640px) {
+    .promo { display: flex; flex-direction: column; }
+    .promo-visual { float: none; order: 1; align-self: center; width: min(100%, 360px); margin: 14px 0 0; }
+  }
+  .promo h2 { margin-bottom: 6px; white-space: pre-line; }
+  .promo p, .promo li { text-wrap: pretty; }
+  .promo .nobr br { display: none; }
+  .promo p { margin: 0 0 8px; }
+  .promo ul { margin: 0 0 10px; padding-left: 20px; line-height: 1.5; }
+  .promo .promo-note { display: flex; gap: 6px; margin: 0 0 14px; }
+  .promo-btn { display: inline-block; background: var(--accent); color: #0f1a13; font-weight: 600; text-decoration: none; border-radius: 6px; padding: 8px 14px; }
+  .promo-btn:hover { filter: brightness(1.1); }
+  .step-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .step-head h2 { margin: 0; }
+  .link-btn { background: #262a2f; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font: inherit; font-size: .85rem; cursor: pointer; }
+  .link-btn:hover { border-color: var(--accent); }
+  .inventory { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .inv-item { display: flex; flex-direction: column; gap: 6px; background: #262a2f; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: .9rem; }
+  .inv-item.has { border-color: var(--accent); }
+  .sub-head { margin: 16px 0 8px; font-size: .95rem; }
+  .add-btn { height: 40px; font-size: 1rem; padding: 0 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; background: #1d3326; border: 1px solid var(--accent); border-radius: 16px; padding: 3px 4px 3px 10px; font-size: .9rem; }
+  .chip button { background: none; border: none; color: var(--muted); cursor: pointer; font: inherit; font-size: 1rem; line-height: 1; padding: 0 6px; }
+  .chip button:hover { color: var(--text); }
+  .board + .board { margin-top: 10px; }
+  .board h3 { margin: 0 0 4px; font-size: .95rem; }
+  #previews svg + svg { margin-top: 16px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <h1 data-i18n="title"></h1>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button type="button" class="link-btn" id="resetAll" data-i18n="resetAll"></button>
+      <select id="lang" aria-label="Sprache / Language">
+      <option value="de">Deutsch</option>
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="it">Italiano</option>
+      <option value="es">Español</option>
+    </select>
+    </div>
+  </div>
+
+  <section>
+    <h2><span data-i18n="step0"></span> <span style="color:var(--muted);font-weight:400" data-i18n="optional"></span></h2>
+    <p class="note" style="margin:0 0 12px" data-i18n="step0Note"></p>
+    <div class="inventory" id="inventory"></div>
+  </section>
+
+  <section>
+    <h2 data-i18n="step1"></h2>
+    <p class="note error" style="margin:0 0 12px;display:flex;gap:6px"><span>⚠️</span><span style="text-wrap:pretty" data-i18n="disclaimer"></span></p>
+    <p class="note" style="margin:0 0 12px" data-i18n="step1Note"></p>
+    <div class="toolbar">
+      <input type="search" id="filter" data-i18n-placeholder="search">
+      <select id="sort" data-i18n-aria="sortLabel">
+        <option value="size-asc" data-i18n="sortSizeAsc"></option>
+        <option value="size-desc" data-i18n="sortSizeDesc"></option>
+        <option value="az" data-i18n="sortAz"></option>
+        <option value="za" data-i18n="sortZa"></option>
+      </select>
+    </div>
+    <div class="games" id="games"></div>
+    <p class="empty" id="noGames" hidden data-i18n="noGames"></p>
+    <h3 class="sub-head" data-i18n="customSize"></h3>
+    <div class="inputs">
+      <label><span data-i18n="width"></span><input type="number" id="w" min="10" max="200" step="2"></label>
+      <label><span data-i18n="length"></span><input type="number" id="l" min="10" max="200" step="2"></label>
+      <button type="button" class="link-btn add-btn" id="addSize" data-i18n="add"></button>
+    </div>
+    <div class="chips" id="selected" hidden></div>
+  </section>
+
+  <section>
+    <h2 data-i18n="step2"></h2>
+    <div class="inputs">
+      <label><span data-i18n="printer"></span>
+        <select id="printer"></select>
+      </label>
+      <label id="customWrap" hidden><span data-i18n="customPlate"></span><input type="number" id="custom" min="80" max="1000" step="1" value="220"></label>
+    </div>
+    <p class="note" id="maxInfo"></p>
+    <p class="note error" style="margin-top:2px;display:flex;gap:6px"><span>⚠️</span><span style="text-wrap:pretty" data-i18n="plateCheck"></span></p>
+  </section>
+
+  <section>
+    <div class="step-head">
+      <h2 data-i18n="step3"></h2>
+      <button type="button" class="link-btn" id="copyLink" data-i18n="copyLink"></button>
+    </div>
+    <div id="result"></div>
+  </section>
+
+  <section>
+    <h2 data-i18n="preview"></h2>
+    <div id="previews"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="promo">
+    <figure class="promo-visual">
+      <img id="promoVisualImg" src="gameframe.gif" alt="GameFrame 3 in 1: 22×30, 30×44, 44×60" width="716" height="542" loading="lazy" onerror="this.parentNode.remove()">
+      <figcaption>22×30" · 30×44" · 44×60"</figcaption>
+      <img class="promo-photo" src="gameframe_foto.jpg" alt="GameFrame 3 in 1" width="800" height="600" loading="lazy" onerror="this.remove()">
+    </figure>
+    <h2 data-i18n="promoTitle"></h2>
+    <p id="promoText"></p>
+    <ul id="promoFeatures"></ul>
+    <p class="note promo-note"><span>ⓘ</span><span data-i18n="promoNote"></span></p>
+    <a class="promo-btn" id="promoLink" target="_blank" rel="noopener noreferrer" data-i18n="promoBtn"></a>
+  </section>
+</main>
+
+<script>
+"use strict";
+
+const CORNER = 3;
+const PIECES = [12, 10, 8, 6, 4];
+const PIECE_COLORS = { 4: "#27ae60", 6: "#2f80d1", 8: "#8e44ad", 10: "#c0392b", 12: "#d63384" };
+const PRINT_MARGIN_MM = 10;
+// Actual printed lengths of the straight pieces in mm
+const PIECE_MM = { 4: 106.8, 6: 157.6, 8: 208.4, 10: 259.2, 12: 310 };
+const ORIGINAL_URL = "https://makerworld.com/de/models/2956328-gameframe-3-in-1-wargaming-battlefield-border";
+
+// Only printers listed in Bambu Studio with a confirmed build plate; longest usable side in mm.
+// Max. 5 examples each, brand order: Bambu, Anycubic, Creality, Elegoo, Geeetech, Anker, Prusa
+const PRINTERS = [
+  { plate: 180, ex: "Bambu Lab A1 mini, Prusa MINI" },
+  { plate: 210, ex: "Anycubic i3 Mega S" },
+  { plate: 220, ex: "Anycubic Kobra 2, Creality Ender-3 V3 / K1 / K1C / Ender-3 V3 KE" },
+  { plate: 225, ex: "Elegoo Neptune 3 Pro / 4 / 4 Pro" },
+  { plate: 235, ex: "Anker M5" },
+  { plate: 245, ex: "Anycubic Vyper" },
+  { plate: 250, ex: "Creality Ender-6, Geeetech Thunder, Prusa MK3S" },
+  { plate: 255, ex: "Geeetech Mizar S / Mizar M / A20 / A20 M" },
+  { plate: 256, ex: "Bambu Lab A1 / P1S / P2S / X1 Carbon / X2D" },
+  { plate: 270, ex: "Anycubic 4Max Pro / 4Max Pro 2" },
+  { plate: 300, ex: "Anycubic Kobra Plus, Creality K1 Max / Ender-3 V3 Plus" },
+  // H2 dual-nozzle area is 300 × 320; pieces lie along the 320 mm axis
+  { plate: 320, ex: "Bambu Lab H2D / H2D Pro / H2C, Elegoo Neptune 3 Plus / 4 Plus" },
+  { plate: 330, ex: "Bambu Lab A2L" },
+  { plate: 340, ex: "Bambu Lab H2S" },
+  { plate: 400, ex: "Anycubic Chiron / Kobra Max" },
+  { plate: 420, ex: "Elegoo Neptune 3 Max / 4 Max" },
+  { plate: null },
+];
+
+const I18N = {
+  de: {
+    title: "GameFrame-Rechner",
+    step0: "0. Vorhandene Teile", step0Note: "Hast du schon Teile gedruckt? Trag sie hier ein – sie werden nach Möglichkeit wiederverwendet.",
+    step1: "1. Spielfelder wählen", optional: "(optional)",
+    step1Note: "Du kannst mehrere Spielfelder auswählen. Der Rechner sucht dann die kleinste Teilemenge, mit der sich jedes davon bauen lässt.",
+    customSize: "Eigene Größe", add: "+ Hinzufügen", selected: "Ausgewählt:", remove: "Entfernen", have: "Vorhanden",
+    nothingToPrint: "🎉 Alle Teile sind schon vorhanden – nichts zu drucken!",
+    disclaimer: "Die Spielfeldgrößen wurden nach bestem Wissen zusammengetragen, können aber nicht garantiert werden. Bitte vor dem Drucken im aktuellen Regelwerk deines Spiels prüfen.",
+    search: "Spiel suchen …", sortLabel: "Sortierung",
+    sortSizeAsc: "Größe: klein → groß", sortSizeDesc: "Größe: groß → klein", sortAz: "Name: A → Z", sortZa: "Name: Z → A",
+    noGames: "Kein Spiel gefunden.",
+    step2: "2. Druckplatte", width: "Breite (Zoll)", length: "Länge (Zoll)", printer: "Druckplatte (längste Seite)", eg: "z. B.",
+    plateCheck: "Bitte die Größe deiner Druckplatte vorher prüfen. Die hier gemachten Angaben können von der tatsächlichen Größe abweichen. Sollte dein Drucker nicht aufgeführt sein, wähle einfach die passende Plattengröße aus der Liste – oder wähle „Eigene Plattengröße“ und trage die Größe im dafür vorgesehenen Feld manuell ein.",
+    customPlate: "Längere Plattenseite (mm)", customPrinter: "Eigene Plattengröße …",
+    maxInfo: (s, mm) => `Größtes Teil für diese Druckplatte: ${s}" (${mm} mm)`,
+    noFit: "Auf diese Druckplatte passt kein Teil.",
+    step3: "3. Ergebnis", side: len => `${len}"-Seiten:`, corner: "Ecke", noPieces: "keine Zwischenteile",
+    impossible: list => `nicht möglich – die Länge minus 6" muss sich aus ${list} zusammensetzen lassen (gerade Zahl, mind. 10")`,
+    parts: "Stückliste & Druckfortschritt", part: "Teil", qty: "Anzahl", cornerPiece: 'Ecke 3"', straight: s => `Gerade ${s}"`, total: "Gesamt",
+    needed: "Benötigt", printed: "Gedruckt", open: "Offen", resetProgress: "Fortschritt zurücksetzen",
+    progressNote: (d, n) => `${d} von ${n} Teilen gedruckt – trag ein, was du schon gedruckt hast. Der Fortschritt wird im Link und in diesem Browser gespeichert.`,
+    allDone: "🎉 Alle Teile gedruckt!",
+    preview: "Vorschau", copyLink: "🔗 Link kopieren", copied: "✓ Link kopiert",
+    choosePlate: "Druckplatte wählen …",
+    resetAll: "↺ Alles zurücksetzen", resetConfirm: "Alle Eingaben, deinen Bestand und den gespeicherten Druckfortschritt löschen?", selectPrompt: "Wähle mindestens ein Spielfeld und deine Druckplatte.",
+    promoTitle: "Kennst du schon GameFrame\u00a0–\n3\u00a0in\u00a01 Wargaming Battlefield Border?",
+    promoText: 'Unser modularer Rahmen, optimiert für das schnelle Umbauen\nzwischen 22×30", 30×44" und 44×60" – ein Set für alle drei Formate.',
+    promoFeatures: [
+      ["Modular & platzsparend:", "Beschriftete Steckteile –\nflach zu verstauen, leicht zu transportieren"],
+      ["Einfacher Aufbau:", "Jedes Teil ist mit einem Buchstaben beschriftet.\nEinfach gleiche Buchstaben in aufsteigender Reihenfolge verbinden – fertig"],
+      ['2"-Raster:', "Markierungen alle 2 Zoll entlang des Rahmens\nzum einfachen Abmessen"],
+      ["Quadranten-Markierungen:", "Farblich hervorgehobene Markierungen,\num die Spielfeld-Quadranten auf einen Blick zu erkennen"],
+      ["", "Optimierte Versionen für verschiedene Drucker –\nvom A1 mini (36 Teile) bis H2D/H2S (22 Teile)"],
+    ],
+    promoBtn: "GameFrame auf MakerWorld ansehen",
+    promoNote: "Die Teile aus diesem Rechner sind nicht mit GameFrame 3 in 1 kompatibel.",
+  },
+  en: {
+    title: "GameFrame Calculator",
+    step0: "0. Parts you already have", step0Note: "Already printed some parts? Enter them here – they will be reused where possible.",
+    step1: "1. Choose board sizes", optional: "(optional)",
+    step1Note: "You can select several board sizes. The calculator then finds the smallest set of parts that can build each of them.",
+    customSize: "Custom size", add: "+ Add", selected: "Selected:", remove: "Remove", have: "In stock",
+    nothingToPrint: "🎉 You already have all parts – nothing to print!",
+    disclaimer: "Board sizes were compiled to the best of our knowledge but cannot be guaranteed. Please check the current rules of your game before printing.",
+    search: "Search game …", sortLabel: "Sort order",
+    sortSizeAsc: "Size: small → large", sortSizeDesc: "Size: large → small", sortAz: "Name: A → Z", sortZa: "Name: Z → A",
+    noGames: "No game found.",
+    step2: "2. Build plate", width: "Width (inches)", length: "Length (inches)", printer: "Build plate (longest side)", eg: "e.g.",
+    plateCheck: "Please check the size of your build plate first. The information given here may differ from the actual size. If your printer isn't listed, simply pick the matching plate size from the list – or choose “Custom bed size” and enter the size manually in the field that appears.",
+    customPlate: "Longer bed side (mm)", customPrinter: "Custom bed size …",
+    maxInfo: (s, mm) => `Largest piece for this build plate: ${s}" (${mm} mm)`,
+    noFit: "No piece fits on this build plate.",
+    step3: "3. Result", side: len => `${len}" sides:`, corner: "Corner", noPieces: "no middle pieces",
+    impossible: list => `not possible – the length minus 6" must be made up of ${list} (even number, min. 10")`,
+    parts: "Parts list & print progress", part: "Part", qty: "Qty", cornerPiece: 'Corner 3"', straight: s => `Straight ${s}"`, total: "Total",
+    needed: "Needed", printed: "Printed", open: "Left", resetProgress: "Reset progress",
+    progressNote: (d, n) => `${d} of ${n} parts printed – enter what you have already printed. Progress is saved in the link and in this browser.`,
+    allDone: "🎉 All parts printed!",
+    preview: "Preview", copyLink: "🔗 Copy link", copied: "✓ Link copied",
+    choosePlate: "Choose build plate …",
+    resetAll: "↺ Reset all", resetConfirm: "Clear all inputs, your stock and saved print progress?", selectPrompt: "Choose at least one board size and your build plate.",
+    promoTitle: "Have you seen GameFrame\u00a0–\n3\u00a0in\u00a01 Wargaming Battlefield Border?",
+    promoText: 'Our modular frame, optimized for quickly switching\nbetween 22×30", 30×44" and 44×60" – one set for all three formats.',
+    promoFeatures: [
+      ["Modular & space-saving:", "Labeled snap-together pieces –\nflat storage, easy transport"],
+      ["Effortless assembly:", "Each piece is labeled with a letter.\nJust connect matching letters in ascending order – done"],
+      ['2" grid markings:', "Reference marks every 2 inches along the frame\nfor easy measurement"],
+      ["Quadrant indicators:", "Color-highlighted markings\nto clearly identify battlefield quadrants at a glance"],
+      ["", "Optimized versions for different printers –\nfrom A1 mini (36 pieces) to H2D/H2S (22 pieces)"],
+    ],
+    promoBtn: "View GameFrame on MakerWorld",
+    promoNote: "The pieces from this calculator are not compatible with GameFrame 3 in 1.",
+  },
+  fr: {
+    title: "GameFrame Calculateur",
+    step0: "0. Pièces déjà disponibles", step0Note: "Tu as déjà imprimé des pièces ? Indique-les ici – elles seront réutilisées si possible.",
+    step1: "1. Choisir les plateaux de jeu", optional: "(facultatif)",
+    step1Note: "Tu peux sélectionner plusieurs plateaux. Le calculateur cherche alors le plus petit ensemble de pièces permettant de construire chacun d'eux.",
+    customSize: "Taille personnalisée", add: "+ Ajouter", selected: "Sélection :", remove: "Retirer", have: "Disponibles",
+    nothingToPrint: "🎉 Tu as déjà toutes les pièces – rien à imprimer !",
+    disclaimer: "Les dimensions des plateaux de jeu ont été compilées au mieux de nos connaissances, mais ne peuvent pas être garanties. Vérifie les règles actuelles de ton jeu avant d'imprimer.",
+    search: "Rechercher un jeu …", sortLabel: "Tri",
+    sortSizeAsc: "Taille : petite → grande", sortSizeDesc: "Taille : grande → petite", sortAz: "Nom : A → Z", sortZa: "Nom : Z → A",
+    noGames: "Aucun jeu trouvé.",
+    step2: "2. Plateau d'impression", width: "Largeur (pouces)", length: "Longueur (pouces)", printer: "Plateau (côté le plus long)", eg: "p. ex.",
+    plateCheck: "Vérifie d'abord la taille de ton plateau d'impression. Les indications données ici peuvent différer de la taille réelle. Si ton imprimante n'est pas listée, choisis simplement la taille de plateau correspondante dans la liste – ou choisis « Taille de plateau personnalisée » et saisis la taille manuellement dans le champ prévu.",
+    customPlate: "Côté le plus long du plateau (mm)", customPrinter: "Taille de plateau personnalisée …",
+    maxInfo: (s, mm) => `Plus grande pièce pour ce plateau : ${s}" (${mm} mm)`,
+    noFit: "Aucune pièce ne tient sur ce plateau d'impression.",
+    step3: "3. Résultat", side: len => `Côtés de ${len}" :`, corner: "Coin", noPieces: "aucune pièce intermédiaire",
+    impossible: list => `impossible – la longueur moins 6" doit pouvoir être composée de ${list} (nombre pair, min. 10")`,
+    parts: "Liste des pièces & progression", part: "Pièce", qty: "Quantité", cornerPiece: 'Coin 3"', straight: s => `Droite ${s}"`, total: "Total",
+    needed: "Nécessaires", printed: "Imprimées", open: "Restantes", resetProgress: "Réinitialiser la progression",
+    progressNote: (d, n) => `${d} pièces sur ${n} imprimées – indique ce que tu as déjà imprimé. La progression est enregistrée dans le lien et dans ce navigateur.`,
+    allDone: "🎉 Toutes les pièces sont imprimées !",
+    preview: "Aperçu", copyLink: "🔗 Copier le lien", copied: "✓ Lien copié",
+    choosePlate: "Choisir le plateau …",
+    resetAll: "↺ Tout réinitialiser", resetConfirm: "Effacer toutes les saisies, ton stock et la progression d'impression enregistrée ?", selectPrompt: "Choisis au moins un plateau de jeu et ton plateau d'impression.",
+    promoTitle: "Tu connais déjà GameFrame\u00a0–\n3\u00a0in\u00a01 Wargaming Battlefield Border\u00a0?",
+    promoText: 'Notre cadre modulaire, optimisé pour passer rapidement\nde 22×30" à 30×44" et 44×60" – un seul set pour les trois formats.',
+    promoFeatures: [
+      ["Modulaire et compact :", "pièces emboîtables étiquetées –\nrangement à plat, transport facile"],
+      ["Montage facile :", "chaque pièce porte une lettre.\nIl suffit de relier les lettres identiques dans l'ordre croissant – c'est tout"],
+      ['Repères tous les 2" :', "des marques tous les 2 pouces le long du cadre\npour mesurer facilement"],
+      ["Indicateurs de quadrants :", "marquages mis en couleur\npour identifier les quadrants du champ de bataille d'un coup d'œil"],
+      ["", "Versions optimisées pour différentes imprimantes –\nde l'A1 mini (36 pièces) à la H2D/H2S (22 pièces)"],
+    ],
+    promoBtn: "Voir GameFrame sur MakerWorld",
+    promoNote: "Les pièces de ce calculateur ne sont pas compatibles avec GameFrame 3 en 1.",
+  },
+  it: {
+    title: "GameFrame Calcolatore",
+    step0: "0. Pezzi già disponibili", step0Note: "Hai già stampato dei pezzi? Inseriscili qui – verranno riutilizzati se possibile.",
+    step1: "1. Scegli i campi di gioco", optional: "(opzionale)",
+    step1Note: "Puoi selezionare più campi di gioco. Il calcolatore cerca il set di pezzi più piccolo con cui costruire ciascuno di essi.",
+    customSize: "Dimensione personalizzata", add: "+ Aggiungi", selected: "Selezionati:", remove: "Rimuovi", have: "Disponibili",
+    nothingToPrint: "🎉 Hai già tutti i pezzi – niente da stampare!",
+    disclaimer: "Le dimensioni dei campi di gioco sono state raccolte al meglio delle nostre conoscenze, ma non possono essere garantite. Controlla il regolamento attuale del tuo gioco prima di stampare.",
+    search: "Cerca gioco …", sortLabel: "Ordinamento",
+    sortSizeAsc: "Dimensione: piccola → grande", sortSizeDesc: "Dimensione: grande → piccola", sortAz: "Nome: A → Z", sortZa: "Nome: Z → A",
+    noGames: "Nessun gioco trovato.",
+    step2: "2. Piatto di stampa", width: "Larghezza (pollici)", length: "Lunghezza (pollici)", printer: "Piatto (lato più lungo)", eg: "ad es.",
+    plateCheck: "Controlla prima la dimensione del tuo piatto di stampa. Le indicazioni qui riportate possono differire dalla dimensione reale. Se la tua stampante non è elencata, scegli semplicemente la dimensione del piatto corrispondente dall'elenco – oppure scegli “Dimensione piatto personalizzata” e inserisci la misura manualmente nell'apposito campo.",
+    customPlate: "Lato maggiore del piatto (mm)", customPrinter: "Dimensione piatto personalizzata …",
+    maxInfo: (s, mm) => `Pezzo più grande per questo piatto: ${s}" (${mm} mm)`,
+    noFit: "Nessun pezzo entra in questo piatto di stampa.",
+    step3: "3. Risultato", side: len => `Lati da ${len}":`, corner: "Angolo", noPieces: "nessun pezzo intermedio",
+    impossible: list => `non possibile – la lunghezza meno 6" deve poter essere composta da ${list} (numero pari, min. 10")`,
+    parts: "Elenco pezzi e avanzamento", part: "Pezzo", qty: "Quantità", cornerPiece: 'Angolo 3"', straight: s => `Dritto ${s}"`, total: "Totale",
+    needed: "Necessari", printed: "Stampati", open: "Mancanti", resetProgress: "Azzera avanzamento",
+    progressNote: (d, n) => `${d} di ${n} pezzi stampati – inserisci quelli già stampati. L'avanzamento viene salvato nel link e in questo browser.`,
+    allDone: "🎉 Tutti i pezzi stampati!",
+    preview: "Anteprima", copyLink: "🔗 Copia link", copied: "✓ Link copiato",
+    choosePlate: "Scegli il piatto …",
+    resetAll: "↺ Azzera tutto", resetConfirm: "Cancellare tutti i dati inseriti, il tuo inventario e l'avanzamento di stampa salvato?", selectPrompt: "Scegli almeno un campo di gioco e il piatto di stampa.",
+    promoTitle: "Conosci già GameFrame\u00a0–\n3\u00a0in\u00a01 Wargaming Battlefield Border?",
+    promoText: 'La nostra cornice modulare, ottimizzata per passare rapidamente\ntra 22×30", 30×44" e 44×60" – un solo set per tutti e tre i formati.',
+    promoFeatures: [
+      ["Modulare e salvaspazio:", "pezzi a incastro etichettati –\nsi ripongono in piano, facili da trasportare"],
+      ["Montaggio semplice:", "ogni pezzo è contrassegnato da una lettera.\nBasta collegare le lettere uguali in ordine crescente – fatto"],
+      ['Tacche ogni 2":', "riferimenti ogni 2 pollici lungo la cornice\nper misurare facilmente"],
+      ["Indicatori dei quadranti:", "marcature evidenziate a colori\nper riconoscere i quadranti del campo a colpo d'occhio"],
+      ["", "Versioni ottimizzate per diverse stampanti –\ndalla A1 mini (36 pezzi) alla H2D/H2S (22 pezzi)"],
+    ],
+    promoBtn: "Vedi GameFrame su MakerWorld",
+    promoNote: "I pezzi di questo calcolatore non sono compatibili con GameFrame 3 in 1.",
+  },
+  es: {
+    title: "GameFrame Calculadora",
+    step0: "0. Piezas que ya tienes", step0Note: "¿Ya has impreso piezas? Introdúcelas aquí: se reutilizarán siempre que sea posible.",
+    step1: "1. Elige los tableros", optional: "(opcional)",
+    step1Note: "Puedes seleccionar varios tableros. La calculadora busca el conjunto de piezas más pequeño con el que construir cada uno de ellos.",
+    customSize: "Tamaño personalizado", add: "+ Añadir", selected: "Seleccionados:", remove: "Quitar", have: "Disponibles",
+    nothingToPrint: "🎉 Ya tienes todas las piezas: ¡nada que imprimir!",
+    disclaimer: "Los tamaños de los tableros se han recopilado lo mejor posible, pero no se pueden garantizar. Comprueba el reglamento actual de tu juego antes de imprimir.",
+    search: "Buscar juego …", sortLabel: "Orden",
+    sortSizeAsc: "Tamaño: pequeño → grande", sortSizeDesc: "Tamaño: grande → pequeño", sortAz: "Nombre: A → Z", sortZa: "Nombre: Z → A",
+    noGames: "No se encontró ningún juego.",
+    step2: "2. Cama de impresión", width: "Ancho (pulgadas)", length: "Largo (pulgadas)", printer: "Cama (lado más largo)", eg: "p. ej.",
+    plateCheck: "Comprueba antes el tamaño de tu cama de impresión. Los datos indicados aquí pueden diferir del tamaño real. Si tu impresora no aparece, elige simplemente el tamaño de cama correspondiente de la lista, o elige “Tamaño de cama personalizado” e introduce la medida manualmente en el campo correspondiente.",
+    customPlate: "Lado más largo de la cama (mm)", customPrinter: "Tamaño de cama personalizado …",
+    maxInfo: (s, mm) => `Pieza más grande para esta cama: ${s}" (${mm} mm)`,
+    noFit: "Ninguna pieza cabe en esta cama de impresión.",
+    step3: "3. Resultado", side: len => `Lados de ${len}":`, corner: "Esquina", noPieces: "sin piezas intermedias",
+    impossible: list => `no es posible: la longitud menos 6" debe poder formarse con ${list} (número par, mín. 10")`,
+    parts: "Lista de piezas y progreso", part: "Pieza", qty: "Cantidad", cornerPiece: 'Esquina 3"', straight: s => `Recta ${s}"`, total: "Total",
+    needed: "Necesarias", printed: "Impresas", open: "Pendientes", resetProgress: "Restablecer progreso",
+    progressNote: (d, n) => `${d} de ${n} piezas impresas: introduce lo que ya has impreso. El progreso se guarda en el enlace y en este navegador.`,
+    allDone: "🎉 ¡Todas las piezas impresas!",
+    preview: "Vista previa", copyLink: "🔗 Copiar enlace", copied: "✓ Enlace copiado",
+    choosePlate: "Elige la cama …",
+    resetAll: "↺ Restablecer todo", resetConfirm: "¿Borrar todos los datos introducidos, tu inventario y el progreso de impresión guardado?", selectPrompt: "Elige al menos un tablero y tu cama de impresión.",
+    promoTitle: "¿Ya conoces GameFrame\u00a0–\n3\u00a0in\u00a01 Wargaming Battlefield Border?",
+    promoText: 'Nuestro marco modular, optimizado para cambiar rápidamente\nentre 22×30", 30×44" y 44×60": un solo set para los tres formatos.',
+    promoFeatures: [
+      ["Modular y compacto:", "piezas encajables etiquetadas –\nse guardan planas y se transportan fácilmente"],
+      ["Montaje sencillo:", "cada pieza lleva una letra.\nSolo hay que unir las letras iguales en orden ascendente – listo"],
+      ['Marcas cada 2":', "referencias cada 2 pulgadas a lo largo del marco\npara medir fácilmente"],
+      ["Indicadores de cuadrantes:", "marcas resaltadas en color\npara identificar los cuadrantes del campo de un vistazo"],
+      ["", "Versiones optimizadas para distintas impresoras –\ndesde la A1 mini (36 piezas) hasta la H2D/H2S (22 piezas)"],
+    ],
+    promoBtn: "Ver GameFrame en MakerWorld",
+    promoNote: "Las piezas de esta calculadora no son compatibles con GameFrame 3 en 1.",
+  },
+};
+
+// Game sub-labels; official format names (Combat Patrol, Skirmish, …) stay untranslated
+const DETAILS = {
+  "150 Punkte": { en: "150 points", fr: "150 points", it: "150 punti", es: "150 puntos" },
+  "200–250 Punkte": { en: "200–250 points", fr: "200–250 points", it: "200–250 punti", es: "200–250 puntos" },
+  "300+ Punkte": { en: "300+ points", fr: "300+ points", it: "300+ punti", es: "300+ puntos" },
+  "bis 1000 Punkte": { en: "up to 1000 points", fr: "jusqu'à 1000 points", it: "fino a 1000 punti", es: "hasta 1000 puntos" },
+  "1000–2000 Punkte": { en: "1000–2000 points", fr: "1000–2000 points", it: "1000–2000 punti", es: "1000–2000 puntos" },
+  "über 2000 Punkte": { en: "over 2000 points", fr: "plus de 2000 points", it: "oltre 2000 punti", es: "más de 2000 puntos" },
+  "kleines Spiel": { en: "small game", fr: "petite partie", it: "partita piccola", es: "partida pequeña" },
+  "kleineres Spiel": { en: "smaller game", fr: "partie plus petite", it: "partita più piccola", es: "partida más pequeña" },
+  "großes Spiel": { en: "large game", fr: "grande partie", it: "partita grande", es: "partida grande" },
+  "große Spiele": { en: "large games", fr: "grandes parties", it: "partite grandi", es: "partidas grandes" },
+  "üblich": { en: "common", fr: "courant", it: "comune", es: "habitual" },
+  "an Land": { en: "on land", fr: "sur terre", it: "a terra", es: "en tierra" },
+  "mit Schiffen": { en: "with ships", fr: "avec navires", it: "con navi", es: "con barcos" },
+};
+
+let lang = "en";
+const T = () => I18N[lang];
+const detailText = d => DETAILS[d]?.[lang] ?? d;
+
+const GAMES = [
+  { name: "Warhammer 40K", detail: "Combat Patrol", w: 44, l: 30 },
+  { name: "Warhammer 40K", detail: "Incursion / Strike Force", w: 44, l: 60 },
+  { name: "Warhammer 40K", detail: "Onslaught", w: 44, l: 90 },
+  { name: "Warhammer: Kill Team", detail: "Killzone", w: 30, l: 22 },
+  { name: "Age of Sigmar", detail: "Standard", w: 44, l: 60 },
+  { name: "Age of Sigmar", detail: "Spearhead", w: 30, l: 22 },
+  { name: "Warhammer: The Old World", detail: "Standard", w: 72, l: 48 },
+  { name: "Infinity", detail: "150 Punkte", w: 32, l: 24 },
+  { name: "Infinity", detail: "200–250 Punkte", w: 48, l: 32 },
+  { name: "Infinity", detail: "300+ Punkte", w: 48, l: 48 },
+  { name: "Malifaux", detail: "Standard", w: 36, l: 36 },
+  { name: "BattleTech: Alpha Strike", detail: "kleines Spiel", w: 36, l: 36 },
+  { name: "BattleTech: Alpha Strike", detail: "großes Spiel", w: 72, l: 48 },
+  { name: "Warhammer: Warcry", detail: "Standard", w: 30, l: 22 },
+  { name: "Warhammer: The Horus Heresy", detail: "Standard", w: 72, l: 48 },
+  { name: "Legions Imperialis", detail: "Standard", w: 72, l: 48 },
+  { name: "Necromunda", detail: "Standard", w: 48, l: 48 },
+  { name: "Mordheim", detail: "Standard", w: 48, l: 48 },
+  { name: "Star Wars: Legion", detail: "Standard", w: 72, l: 36 },
+  { name: "Star Wars: Armada", detail: "Standard", w: 72, l: 36 },
+  { name: "Star Wars: X-Wing", detail: "Standard", w: 36, l: 36 },
+  { name: "Star Wars: Shatterpoint", detail: "Standard", w: 36, l: 36 },
+  { name: "Marvel: Crisis Protocol", detail: "Standard", w: 36, l: 36 },
+  { name: "Bolt Action", detail: "Standard", w: 72, l: 48 },
+  { name: "Flames of War", detail: "Standard", w: 72, l: 48 },
+  { name: "Kings of War", detail: "Standard", w: 72, l: 48 },
+  { name: "Conquest", detail: "Last Argument of Kings", w: 72, l: 48 },
+  { name: "A Song of Ice and Fire", detail: "Standard", w: 48, l: 48 },
+  { name: "SAGA", detail: "Standard", w: 48, l: 36 },
+  { name: "Trench Crusade", detail: "kleines Spiel", w: 36, l: 36 },
+  { name: "Trench Crusade", detail: "großes Spiel", w: 48, l: 48 },
+  { name: "Frostgrave / Stargrave", detail: "Standard", w: 36, l: 36 },
+  { name: "Bushido", detail: "Standard", w: 24, l: 24 },
+  { name: "Deadzone", detail: "Standard", w: 24, l: 24 },
+  { name: "Middle-earth SBG", detail: "Matched Play", w: 48, l: 48 },
+  { name: "Middle-earth SBG", detail: "große Spiele", w: 72, l: 48 },
+  { name: "Dystopian Wars", detail: "bis 1000 Punkte", w: 48, l: 36 },
+  { name: "Dystopian Wars", detail: "1000–2000 Punkte", w: 48, l: 48 },
+  { name: "Dystopian Wars", detail: "über 2000 Punkte", w: 72, l: 48 },
+  { name: "Epic Warpath", detail: "kleineres Spiel", w: 48, l: 48 },
+  { name: "Epic Warpath", detail: "Standard", w: 72, l: 48 },
+  { name: "Firefight", detail: "Standard", w: 48, l: 48 },
+  { name: "Firefight", detail: "großes Spiel", w: 72, l: 48 },
+  { name: "Dropfleet Commander", detail: "Standard", w: 48, l: 48 },
+  { name: "Warmachine MK4", detail: "Standard", w: 48, l: 48 },
+  { name: "Konflikt '47", detail: "Standard", w: 72, l: 48 },
+  { name: "Black Powder", detail: "üblich", w: 72, l: 48 },
+  { name: "Hail Caesar", detail: "üblich", w: 72, l: 48 },
+  { name: "Blood & Plunder", detail: "an Land", w: 36, l: 36 },
+  { name: "Blood & Plunder", detail: "mit Schiffen", w: 48, l: 36 },
+  { name: "Star Wars: Legion", detail: "Skirmish", w: 36, l: 36 },
+  { name: "Fallout: Wasteland Warfare", detail: "Standard", w: 36, l: 36 },
+  { name: "Carnevale", detail: "Standard", w: 36, l: 36 },
+  { name: "Moonstone", detail: "Standard", w: 36, l: 36 },
+];
+
+const $ = id => document.getElementById(id);
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+// All splits of one side, from the fewest pieces up to `extra` more (size lists, descending)
+function sideOptions(target, sizes, extra) {
+  if (target === 0) return [[]];
+  if (target < 0 || sizes.length === 0) return [];
+  if (target % sizes.reduce(gcd) !== 0) return [];
+
+  const smallest = sizes[sizes.length - 1];
+  const found = [];
+  let minN = null;
+  for (let n = Math.ceil(target / sizes[0]); n <= Math.floor(target / smallest); n++) {
+    if (minN !== null && n > minN + extra) break;
+    const before = found.length;
+    const picked = [];
+    const walk = (i, rest, left) => {
+      if (left === 0) { if (rest === 0) found.push([...picked]); return; }
+      if (i >= sizes.length || rest > left * sizes[i] || rest < left * smallest) return;
+      const s = sizes[i];
+      for (let k = Math.min(left, Math.floor(rest / s)); k >= 0; k--) {
+        for (let j = 0; j < k; j++) picked.push(s);
+        walk(i + 1, rest - k * s, left - k);
+        picked.length -= k;
+      }
+    };
+    walk(0, target, n);
+    if (minN === null && found.length > before) minN = n;
+  }
+  return found;
+}
+
+const sumSq = list => list.reduce((a, s) => a + s * s, 0);
+// A side can be laid out mirror-symmetric if at most one size occurs an odd number of times
+const asymmetry = list => Math.max(0, countBySize(list).filter(([, n]) => n % 2).length - 1);
+const quality = list => asymmetry(list) * 1e6 + sumSq(list);
+const compare = (p, q) => { for (let i = 0; i < p.length; i++) if (p[i] !== q[i]) return p[i] - q[i]; return 0; };
+const fits = (c, R) => Object.entries(c).every(([s, n]) => n <= (R[s] || 0));
+
+// Extra pieces per side let different boards share part sizes
+const EXTRA_PIECES = 2;
+const BEAM_WIDTH = 300;
+
+// Distinct part counts for one board (both sides twice), best layout per count
+function boardOptions(board, sizes, allowed, inv) {
+  const A = sideOptions(board.w - 2 * CORNER, sizes, EXTRA_PIECES);
+  const B = board.w === board.l ? A : sideOptions(board.l - 2 * CORNER, sizes, EXTRA_PIECES);
+  const best = new Map();
+  for (const a of A) for (const b of B) {
+    const c = {};
+    for (const s of [...a, ...a, ...b, ...b]) c[s] = (c[s] || 0) + 1;
+    // Sizes too long for the chosen plate may only come from the stock
+    if (Object.entries(c).some(([s, n]) => !allowed.includes(Number(s)) && n > (inv[s] || 0))) continue;
+    const key = PIECES.map(s => c[s] || 0).join();
+    const q = quality(a) + quality(b);
+    if (!best.has(key) || q < best.get(key).q) best.set(key, { c, a, b, q });
+  }
+  const total = c => Object.values(c).reduce((x, n) => x + n, 0);
+  return [...best.values()].sort((x, y) => total(x.c) - total(y.c) || x.q - y.q).slice(0, 150);
+}
+
+// Smallest part set (then fewest new prints, then nicest layouts) that builds every board, one at a time
+function planParts(options, inv) {
+  const cost = (R, q) => {
+    let total = 0, fresh = 0;
+    for (const s of PIECES) { total += R[s] || 0; fresh += Math.max(0, (R[s] || 0) - (inv[s] || 0)); }
+    return [total, fresh, q];
+  };
+  let beam = [{ R: {}, q: 0 }];
+  for (const opts of options) {
+    const next = new Map();
+    for (const st of beam) for (const o of opts) {
+      const R = { ...st.R };
+      for (const [s, n] of Object.entries(o.c)) R[s] = Math.max(R[s] || 0, n);
+      const cand = { R, q: st.q + o.q };
+      cand.cost = cost(R, cand.q);
+      const key = PIECES.map(s => R[s] || 0).join();
+      if (!next.has(key) || compare(cand.cost, next.get(key).cost) < 0) next.set(key, cand);
+    }
+    beam = [...next.values()].sort((x, y) => compare(x.cost, y.cost)).slice(0, BEAM_WIDTH);
+  }
+  const R = beam[0].R;
+  const picks = options.map(opts => opts.filter(o => fits(o.c, R)).reduce((x, y) => y.q < x.q ? y : x));
+  return { R, picks };
+}
+
+function countBySize(list) {
+  const counts = new Map();
+  for (const s of list) counts.set(s, (counts.get(s) || 0) + 1);
+  return [...counts.entries()].sort((a, b) => b[0] - a[0]);
+}
+
+function formatList(list) {
+  if (list.length === 0) return T().noPieces;
+  return countBySize(list).map(([s, n]) => `${n}× ${s}"`).join(" + ");
+}
+
+function plateSize() {
+  const p = PRINTERS[$("printer").value];
+  return p.plate ?? Number($("custom").value);
+}
+
+function allowedPieces() {
+  const usable = plateSize() - PRINT_MARGIN_MM;
+  return PIECES.filter(s => PIECE_MM[s] <= usable);
+}
+
+function el(tag, props = {}, ...children) {
+  const e = document.createElement(tag);
+  Object.assign(e, props);
+  for (const c of children) e.append(c);
+  return e;
+}
+
+function render() {
+  const result = $("result");
+  result.replaceChildren();
+  $("previews").replaceChildren();
+
+  const plateChosen = $("printer").value !== "";
+  currentProgress = null;
+  $("customWrap").hidden = !plateChosen || PRINTERS[$("printer").value].plate !== null;
+  saveToUrl();
+
+  if (!plateChosen || !boards.length) {
+    $("maxInfo").textContent = "";
+    result.append(el("p", { className: "empty", textContent: T().selectPrompt }));
+    return;
+  }
+
+  const allowed = allowedPieces();
+  $("maxInfo").textContent = allowed.length
+    ? T().maxInfo(allowed[0], PIECE_MM[allowed[0]].toFixed(1))
+    : "";
+
+  if (allowed.length === 0) {
+    result.append(el("p", { className: "error", textContent: T().noFit }));
+    return;
+  }
+
+  const usable = PIECES.filter(s => allowed.includes(s) || (inventory[s] || 0) > 0);
+  const options = boards.map(b => boardOptions(b, usable, allowed, inventory));
+  const ok = boards.filter((_, i) => options[i].length);
+  boards.forEach((b, i) => {
+    if (!options[i].length)
+      result.append(el("p", { className: "error", textContent: `${b.w}" × ${b.l}": ${T().impossible(usable.map(s => `${s}"`).join(", "))}` }));
+  });
+  if (!ok.length) return;
+
+  const { R, picks } = planParts(options.filter(o => o.length), inventory);
+
+  ok.forEach((b, i) => {
+    const block = el("div", { className: "board" });
+    if (boards.length > 1) block.append(el("h3", { textContent: `${b.w}" × ${b.l}"` }));
+    for (const [len, seg] of [[b.w, picks[i].a], [b.l, picks[i].b]])
+      block.append(el("div", { className: "side" }, el("b", { textContent: T().side(len) }), " ",
+        `${T().corner} + ${formatList(seg)} + ${T().corner}`));
+    result.append(block);
+  });
+
+  const have = k => Math.min(k === "corner" ? 4 : R[k], inventory[k] || 0);
+  const items = [{ key: "corner", label: T().cornerPiece, color: "var(--corner)", need: 4, have: have("corner") },
+    ...PIECES.filter(s => R[s]).map(s => ({ key: String(s), label: T().straight(s), color: PIECE_COLORS[s], need: R[s], have: have(s) }))];
+  const showHave = Object.values(inventory).some(n => n > 0);
+  result.append(el("h2", { textContent: T().parts, style: "margin-top:16px" }), progressTable(items, progressKey(), showHave));
+
+  ok.forEach((b, i) => {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    $("previews").append(svg);
+    drawPreview(svg, b.w, b.l, picks[i].a, picks[i].b);
+  });
+}
+
+function loadProgress(key) {
+  try { return JSON.parse(localStorage.getItem(`gf-progress:${key}`)) || {}; } catch { return {}; }
+}
+
+function saveProgress(key, data) {
+  try { localStorage.setItem(`gf-progress:${key}`, JSON.stringify(data)); } catch { /* storage blocked */ }
+}
+
+// Parts list where the user tracks how many of the parts still to print are done
+function progressTable(items, storeKey, showHave) {
+  const t = T();
+  const done = loadProgress(storeKey);
+  const wrap = el("div");
+  const bar = el("div", { className: "progress" }, el("div", { className: "progress-fill" }));
+  const status = el("p", { className: "note", style: "margin:6px 0 10px" });
+  const table = el("table", { className: "progress-table" });
+  table.append(el("tr", {},
+    el("th", { textContent: t.part }),
+    el("th", { textContent: t.needed }),
+    ...(showHave ? [el("th", { textContent: t.have })] : []),
+    el("th", { textContent: t.printed }),
+    el("th", { textContent: t.open })));
+
+  const swatch = c => { const s = el("span", { className: "swatch" }); s.style.setProperty("--c", c); return s; };
+  const toPrint = i => i.need - i.have;
+  const totalNew = items.reduce((a, i) => a + toPrint(i), 0);
+  const totalDone = el("td"), totalOpen = el("td");
+
+  const refresh = () => {
+    const printed = items.reduce((a, i) => a + Math.min(done[i.key] || 0, toPrint(i)), 0);
+    totalDone.textContent = printed;
+    totalOpen.textContent = totalNew - printed;
+    bar.firstChild.style.width = `${totalNew ? (printed / totalNew) * 100 : 100}%`;
+    status.textContent = totalNew === 0 ? t.nothingToPrint : printed >= totalNew ? t.allDone : t.progressNote(printed, totalNew);
+    saveProgress(storeKey, done);
+    currentProgress = done;
+    saveToUrl();
+  };
+
+  const setters = [];
+  for (const item of items) {
+    const max = toPrint(item);
+    const openCell = el("td");
+    const printedCell = el("td");
+    const row = el("tr", {},
+      el("td", {}, swatch(item.color), item.label),
+      el("td", { textContent: item.need }),
+      ...(showHave ? [el("td", { textContent: item.have })] : []),
+      printedCell, openCell);
+    table.append(row);
+
+    if (max === 0) {
+      printedCell.textContent = "–";
+      openCell.textContent = 0;
+      row.classList.add("complete");
+      continue;
+    }
+    const input = el("input", { type: "number", min: 0, max, value: Math.min(done[item.key] || 0, max), className: "count" });
+    const set = v => {
+      v = Math.min(max, Math.max(0, Math.round(Number(v) || 0)));
+      input.value = v;
+      done[item.key] = v;
+      openCell.textContent = max - v;
+      row.classList.toggle("complete", v >= max);
+      refresh();
+    };
+    printedCell.append(el("div", { className: "stepper" },
+      el("button", { type: "button", textContent: "−", onclick: () => set(Number(input.value) - 1) }),
+      input,
+      el("button", { type: "button", textContent: "+", onclick: () => set(Number(input.value) + 1) })));
+    input.addEventListener("input", () => set(input.value));
+    setters.push(set);
+    set(input.value);
+  }
+
+  table.append(el("tr", { className: "total" },
+    el("td", { textContent: t.total }), el("td", { textContent: items.reduce((a, i) => a + i.need, 0) }),
+    ...(showHave ? [el("td", { textContent: items.reduce((a, i) => a + i.have, 0) })] : []),
+    totalDone, totalOpen));
+
+  const reset = el("button", { type: "button", className: "link-btn", textContent: t.resetProgress, style: "margin-top:10px" });
+  // Reset in place so the progress bar animates back to zero
+  reset.addEventListener("click", () => setters.forEach(set => set(0)));
+
+  refresh();
+  wrap.append(bar, status, table);
+  if (totalNew > 0) wrap.append(reset);
+  return wrap;
+}
+
+// Mirror pairs of equal pieces around the centre; unpaired pieces go in the middle
+function symmetric(list) {
+  const left = [], middle = [];
+  for (const [s, n] of countBySize(list)) {
+    for (let i = 0; i < Math.floor(n / 2); i++) left.push(s);
+    if (n % 2) middle.push(s);
+  }
+  return [...left, ...middle, ...[...left].reverse()];
+}
+
+function drawPreview(svg, w, l, segW, segL) {
+  const NS = "http://www.w3.org/2000/svg";
+  // Longer side horizontal for a better fit
+  const flip = l > w;
+  const H = flip ? l : w, V = flip ? w : l;
+  const segH = (flip ? segL : segW) && symmetric(flip ? segL : segW);
+  const segV = (flip ? segW : segL) && symmetric(flip ? segW : segL);
+  const gap = 0.15, pad = 1;
+
+  svg.setAttribute("viewBox", `${-pad} ${-pad} ${H + 2 * pad} ${V + 2 * pad}`);
+  // Scale with frame size: 72" and larger use full width, small frames shrink (min. 35 %)
+  svg.style.width = `${Math.min(100, Math.max(35, H / 72 * 100))}%`;
+  svg.style.marginInline = "auto";
+  svg.replaceChildren();
+
+  // Font sizes are given in screen pixels and converted to SVG units
+  const pxPerUnit = svg.getBoundingClientRect().width / (H + 2 * pad) || 10;
+  const pieceFont = Math.max(0.7, 12 / pxPerUnit);
+  const dimsFont = Math.max(Math.min(H, V) / 14, 15 / pxPerUnit);
+  const bar = Math.max(1.2, pieceFont * 1.7);
+
+  const rect = (x, y, rw, rh, fill) => {
+    const r = document.createElementNS(NS, "rect");
+    for (const [k, v] of Object.entries({ x, y, width: Math.max(rw, 0), height: Math.max(rh, 0), rx: 0.15 })) r.setAttribute(k, v);
+    // style instead of attribute so CSS variables resolve
+    r.style.fill = fill;
+    svg.append(r);
+  };
+  const label = (x, y, text, rotate) => {
+    const t = document.createElementNS(NS, "text");
+    t.setAttribute("x", x); t.setAttribute("y", y);
+    t.setAttribute("font-size", pieceFont); t.setAttribute("fill", "#fff");
+    t.setAttribute("text-anchor", "middle"); t.setAttribute("dominant-baseline", "central");
+    if (rotate) t.setAttribute("transform", `rotate(-90 ${x} ${y})`);
+    t.textContent = text;
+    svg.append(t);
+  };
+
+  rect(bar, bar, H - 2 * bar, V - 2 * bar, "#262a2f");
+
+  const dims = document.createElementNS(NS, "text");
+  for (const [k, v] of Object.entries({ x: H / 2, y: V / 2, "font-size": dimsFont, fill: "#9aa0a6",
+    "text-anchor": "middle", "dominant-baseline": "central", "font-weight": "600" })) dims.setAttribute(k, v);
+  dims.textContent = `${V}" × ${H}"`;
+  svg.append(dims);
+
+  for (const [cx, cy, sx, sy] of [[0, 0, 1, 1], [H, 0, -1, 1], [0, V, 1, -1], [H, V, -1, -1]]) {
+    const len = CORNER - gap;
+    rect(sx > 0 ? cx : cx - len, sy > 0 ? cy : cy - bar, len, bar, "var(--corner)");
+    rect(sx > 0 ? cx : cx - bar, sy > 0 ? cy : cy - len, bar, len, "var(--corner)");
+  }
+
+  const color = s => PIECE_COLORS[s];
+  if (segH) {
+    let x = CORNER;
+    for (const s of segH) {
+      for (const y of [0, V - bar]) {
+        rect(x + gap / 2, y, s - gap, bar, color(s));
+        label(x + s / 2, y + bar / 2, `${s}"`);
+      }
+      x += s;
+    }
+  }
+  if (segV) {
+    let y = CORNER;
+    for (const s of segV) {
+      for (const x of [0, H - bar]) {
+        rect(x, y + gap / 2, bar, s - gap, color(s));
+        label(x + bar / 2, y + s / 2, `${s}"`, true);
+      }
+      y += s;
+    }
+  }
+}
+
+function sizeKey(w, l) { return `${Math.max(w, l)}x${Math.min(w, l)}`; }
+
+function buildGroups() {
+  const groups = new Map();
+  for (const g of GAMES) {
+    const key = sizeKey(g.w, g.l);
+    if (!groups.has(key)) groups.set(key, { key, w: Math.max(g.w, g.l), l: Math.min(g.w, g.l), games: [] });
+    groups.get(key).games.push(g);
+  }
+  const byName = (a, b) => a.name.localeCompare(b.name) || a.detail.localeCompare(b.detail);
+  for (const grp of groups.values()) grp.games.sort(byName);
+  return [...groups.values()];
+}
+
+const GROUPS = buildGroups();
+let boards = [];
+let inventory = {};
+const INV_KEYS = ["corner", ...[...PIECES].reverse().map(String)];
+const isSelected = key => boards.some(b => sizeKey(b.w, b.l) === key);
+
+function toggleBoard(w, l) {
+  const key = sizeKey(w, l);
+  if (isSelected(key)) boards = boards.filter(b => sizeKey(b.w, b.l) !== key);
+  else boards.push({ w: Math.min(w, l), l: Math.max(w, l) });
+  renderGames();
+  renderSelected();
+  render();
+}
+
+function renderSelected() {
+  const box = $("selected");
+  box.replaceChildren();
+  box.hidden = !boards.length;
+  if (!boards.length) return;
+  box.append(el("span", { className: "note", style: "margin:0", textContent: T().selected }));
+  for (const b of boards) {
+    const x = el("button", { type: "button", textContent: "×", title: T().remove });
+    x.setAttribute("aria-label", T().remove);
+    x.addEventListener("click", () => toggleBoard(b.w, b.l));
+    box.append(el("span", { className: "chip" }, `${b.w}" × ${b.l}"`, x));
+  }
+}
+
+function renderInventory() {
+  const box = $("inventory");
+  box.replaceChildren();
+  for (const k of INV_KEYS) {
+    const swatch = el("span", { className: "swatch" });
+    swatch.style.setProperty("--c", k === "corner" ? "var(--corner)" : PIECE_COLORS[k]);
+    const input = el("input", { type: "number", min: 0, max: 999, value: inventory[k] || 0, className: "count" });
+    const item = el("div", { className: "inv-item" }, el("span", {}, swatch, k === "corner" ? T().cornerPiece : `${k}"`));
+    const set = v => {
+      v = Math.min(999, Math.max(0, Math.round(Number(v) || 0)));
+      input.value = v;
+      if (v) inventory[k] = v; else delete inventory[k];
+      item.classList.toggle("has", v > 0);
+      render();
+    };
+    input.addEventListener("input", () => set(input.value));
+    item.classList.toggle("has", (inventory[k] || 0) > 0);
+    item.append(el("div", { className: "stepper" },
+      el("button", { type: "button", textContent: "−", onclick: () => set(Number(input.value) - 1) }),
+      input,
+      el("button", { type: "button", textContent: "+", onclick: () => set(Number(input.value) + 1) })));
+    box.append(item);
+  }
+}
+
+function renderGames() {
+  const container = $("games");
+  const q = $("filter").value.trim().toLowerCase();
+  const sort = $("sort").value;
+  const label = g => g.detail === "Standard" ? g.name : `${g.name} – ${detailText(g.detail)}`;
+
+  const visible = GROUPS
+    .map(grp => ({ ...grp, games: grp.games.filter(g => label(g).toLowerCase().includes(q)) }))
+    .filter(grp => grp.games.length > 0);
+
+  // Ascending: shorter side first; descending: longer side first (grp.l = shorter, grp.w = longer)
+  const sorters = {
+    "size-asc": (a, b) => a.l - b.l || a.w - b.w,
+    "size-desc": (a, b) => b.w - a.w || b.l - a.l,
+    "az": (a, b) => a.games[0].name.localeCompare(b.games[0].name, lang),
+    "za": (a, b) => b.games.at(-1).name.localeCompare(a.games.at(-1).name, lang),
+  };
+  visible.sort(sorters[sort]);
+
+  container.replaceChildren();
+  for (const grp of visible) {
+    const games = sort === "za" ? [...grp.games].reverse() : grp.games;
+    const list = el("ul");
+    for (const g of games) {
+      const li = el("li", { textContent: g.name });
+      if (g.detail !== "Standard") li.append(" ", el("span", { textContent: `(${detailText(g.detail)})` }));
+      list.append(li);
+    }
+    const btn = el("button", { type: "button", className: isSelected(grp.key) ? "active" : "" },
+      el("div", { className: "size", textContent: sort === "size-desc" ? `${grp.w}" × ${grp.l}"` : `${grp.l}" × ${grp.w}"` }), list);
+    btn.addEventListener("click", () => toggleBoard(grp.l, grp.w));
+    container.append(btn);
+  }
+  $("noGames").hidden = visible.length > 0;
+}
+
+function lineWidths(e) {
+  const range = document.createRange();
+  range.selectNodeContents(e);
+  const lines = new Map();
+  for (const r of range.getClientRects()) {
+    if (r.width <= 0) continue;
+    const top = Math.round(r.top), cur = lines.get(top);
+    lines.set(top, cur ? [Math.min(cur[0], r.left), Math.max(cur[1], r.right)] : [r.left, r.right]);
+  }
+  return [...lines.values()].map(([l, r]) => r - l);
+}
+
+function withBreaks(text) {
+  return text.split("\n").flatMap((part, i) => i ? [" ", el("br"), part] : [part]);
+}
+
+function fixOrphans() {
+  // Preferred breaks are dropped when a segment doesn't fit; browsers skip text-wrap balancing next to floats, so narrow blocks with a short last line.
+  for (const e of document.querySelectorAll("#promoText, .promo li")) {
+    e.classList.remove("nobr");
+    e.style.maxWidth = "";
+    let widths = lineWidths(e);
+    if (widths.length > e.querySelectorAll("br").length + 1) {
+      e.classList.add("nobr");
+      widths = lineWidths(e);
+    } else if (e.querySelector("br")) continue;
+    if (widths.length < 2 || widths.at(-1) >= 0.5 * Math.max(...widths)) continue;
+    let lo = e.clientWidth * 0.5, hi = e.clientWidth;
+    const target = widths.length;
+    while (hi - lo > 4) {
+      const mid = (lo + hi) / 2;
+      e.style.maxWidth = mid + "px";
+      if (lineWidths(e).length > target) lo = mid; else hi = mid;
+    }
+    e.style.maxWidth = Math.ceil(hi) + "px";
+  }
+}
+
+function applyLanguage() {
+  const t = T();
+  document.documentElement.lang = lang;
+  document.title = t.title;
+  document.querySelectorAll("[data-i18n]").forEach(e => { e.textContent = t[e.dataset.i18n]; });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(e => { e.placeholder = t[e.dataset.i18nPlaceholder]; });
+  document.querySelectorAll("[data-i18n-aria]").forEach(e => { e.setAttribute("aria-label", t[e.dataset.i18nAria]); });
+
+  const select = $("printer");
+  select.options[0].textContent = t.choosePlate;
+  PRINTERS.forEach((p, i) => { select.options[i + 1].textContent = p.plate ? `${p.plate} mm – ${t.eg} ${p.ex}` : t.customPrinter; });
+
+  const legend = $("legend");
+  legend.replaceChildren();
+  for (const [c, text] of [["var(--corner)", t.cornerPiece], ...[...PIECES].reverse().map(s => [PIECE_COLORS[s], `${s}"`])]) {
+    const item = el("span", { textContent: text });
+    item.style.setProperty("--c", c);
+    legend.append(item);
+  }
+
+  $("promoLink").href = ORIGINAL_URL;
+  $("promoText").replaceChildren(...withBreaks(t.promoText));
+  $("promoFeatures").replaceChildren(...t.promoFeatures.map(([head, text]) =>
+    el("li", {}, ...(head ? [el("strong", { textContent: head }), " "] : []), ...withBreaks(text))));
+  fixOrphans();
+
+  renderInventory();
+  renderSelected();
+  renderGames();
+  render();
+}
+
+const evenInch = v => Math.min(200, Math.max(10, Math.round(Number(v) / 2) * 2));
+const progressKey = () => `${boards.map(b => `${b.w}x${b.l}`).sort().join("+")}@${plateSize()}`;
+let currentProgress = null;
+
+// Count maps as "part.count" pairs joined by "_" (URL-safe), e.g. corner.4_12.14
+const encodeCounts = obj => INV_KEYS.filter(k => obj?.[k] > 0).map(k => `${k}.${obj[k]}`).join("_");
+function decodeCounts(str) {
+  const out = {};
+  for (const pair of (str || "").split("_")) {
+    const [k, v] = pair.split(".");
+    if (INV_KEYS.includes(k) && Number(v) > 0) out[k] = Math.min(999, Math.round(Number(v)));
+  }
+  return out;
+}
+
+function saveToUrl() {
+  const params = new URLSearchParams();
+  if (boards.length) params.set("b", boards.map(b => `${b.w}x${b.l}`).join("_"));
+  if ($("printer").value !== "") {
+    const p = PRINTERS[$("printer").value];
+    params.set("plate", p.plate ?? "custom");
+    if (p.plate === null) params.set("mm", $("custom").value);
+  }
+  if (encodeCounts(inventory)) params.set("inv", encodeCounts(inventory));
+  if (encodeCounts(currentProgress)) params.set("done", encodeCounts(currentProgress));
+  const query = params.toString();
+  history.replaceState(null, "", location.pathname + (query ? `?${query}` : ""));
+  try { localStorage.setItem("gf-last", query); } catch { /* storage blocked */ }
+}
+
+function loadFromUrl() {
+  let search = location.search;
+  // No link parameters: continue where the user left off in this browser
+  if (!search) try { search = localStorage.getItem("gf-last") || ""; } catch { /* storage blocked */ }
+  const params = new URLSearchParams(search);
+  // "w"/"l" is the older single-board link format
+  const list = params.has("b") ? params.get("b").split("_") : params.has("w") ? [`${params.get("w")}x${params.get("l")}`] : [];
+  for (const item of list) {
+    const [w, l] = item.split("x").map(Number);
+    if (Number.isFinite(w) && Number.isFinite(l) && !isSelected(sizeKey(evenInch(w), evenInch(l))))
+      boards.push({ w: Math.min(evenInch(w), evenInch(l)), l: Math.max(evenInch(w), evenInch(l)) });
+  }
+  const plate = params.get("plate");
+  const idx = PRINTERS.findIndex(p => String(p.plate) === plate);
+  if (idx >= 0) $("printer").value = String(idx);
+  else if (plate === "custom") {
+    $("printer").value = String(PRINTERS.length - 1);
+    const mm = Number(params.get("mm"));
+    if (mm >= 80 && mm <= 1000) $("custom").value = mm;
+  }
+  inventory = decodeCounts(params.get("inv"));
+  if (params.has("done") && boards.length && $("printer").value !== "")
+    saveProgress(progressKey(), decodeCounts(params.get("done")));
+}
+
+function init() {
+  const select = $("printer");
+  select.append(el("option", { value: "", disabled: true, selected: true }));
+  PRINTERS.forEach((p, i) => select.append(el("option", { value: String(i) })));
+  loadFromUrl();
+
+  // Clear inputs and all saved progress; the chosen language is kept
+  $("resetAll").addEventListener("click", () => {
+    if (!confirm(T().resetConfirm)) return;
+    try {
+      for (const k of Object.keys(localStorage))
+        if (k === "gf-last" || k.startsWith("gf-progress:")) localStorage.removeItem(k);
+    } catch { /* storage blocked */ }
+    location.href = location.pathname;
+  });
+
+  $("copyLink").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(location.href);
+      $("copyLink").textContent = T().copied;
+      setTimeout(() => { $("copyLink").textContent = T().copyLink; }, 2000);
+    } catch { /* clipboard blocked */ }
+  });
+
+  let saved = null;
+  try { saved = localStorage.getItem("rahmen-lang"); } catch { /* storage blocked */ }
+  lang = I18N[saved] ? saved : "en";
+  $("lang").value = lang;
+  $("lang").addEventListener("input", e => {
+    lang = e.target.value;
+    try { localStorage.setItem("rahmen-lang", lang); } catch { /* storage blocked */ }
+    applyLanguage();
+  });
+
+  for (const id of ["w", "l"]) {
+    // Snap typed values to the nearest even inch once editing is finished
+    $(id).addEventListener("change", e => { if (e.target.value !== "") e.target.value = evenInch(e.target.value); });
+    $(id).addEventListener("keydown", e => { if (e.key === "Enter") $("addSize").click(); });
+  }
+  $("addSize").addEventListener("click", () => {
+    if (!$("w").value || !$("l").value) return;
+    const w = evenInch($("w").value), l = evenInch($("l").value);
+    if (!isSelected(sizeKey(w, l))) toggleBoard(w, l);
+    $("w").value = "";
+    $("l").value = "";
+  });
+  for (const id of ["printer", "custom"]) $(id).addEventListener("input", render);
+  for (const id of ["filter", "sort"]) $(id).addEventListener("input", renderGames);
+  window.addEventListener("resize", render);
+  window.addEventListener("resize", fixOrphans);
+  $("promoVisualImg")?.addEventListener("load", fixOrphans);
+
+  applyLanguage();
+}
+
+init();
+</script>
+</body>
+</html>
