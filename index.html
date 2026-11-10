@@ -78,7 +78,7 @@
     .promo { display: flex; flex-direction: column; }
     .promo-visual { float: none; order: 1; align-self: center; width: min(100%, 360px); margin: 14px 0 0; }
   }
-  .promo h2 { margin-bottom: 6px; white-space: pre-line; }
+  .promo h2 { margin-bottom: 1.2em; white-space: pre-line; }
   .promo p, .promo li { text-wrap: pretty; }
   .promo .nobr br { display: none; }
   .promo p { margin: 0 0 8px; }
@@ -182,9 +182,9 @@
 
   <section class="promo">
     <figure class="promo-visual">
-      <img id="promoVisualImg" src="gameframe.gif" alt="GameFrame 3 in 1: 22×30, 30×44, 44×60" width="716" height="542" loading="lazy" onerror="this.parentNode.remove()">
+      <img id="promoVisualImg" src="gameframe.gif" alt="GameFrame – Modular: 22×30, 30×44, 44×60" width="716" height="542" loading="lazy" onerror="this.parentNode.remove()">
       <figcaption>22×30" · 30×44" · 44×60"</figcaption>
-      <img class="promo-photo" src="gameframe_foto.jpg" alt="GameFrame 3 in 1" width="800" height="600" loading="lazy" onerror="this.remove()">
+      <img class="promo-photo" src="gameframe_foto.jpg" alt="GameFrame – Modular" width="800" height="600" loading="lazy" onerror="this.remove()">
     </figure>
     <h2 data-i18n="promoTitle"></h2>
     <p id="promoText"></p>
@@ -254,7 +254,7 @@ const I18N = {
     preview: "Vorschau", copyLink: "🔗 Link kopieren", copied: "✓ Link kopiert",
     choosePlate: "Druckplatte wählen …",
     resetAll: "↺ Alles zurücksetzen", resetConfirm: "Alle Eingaben, deinen Bestand und den gespeicherten Druckfortschritt löschen?", selectPrompt: "Wähle mindestens ein Spielfeld und deine Druckplatte.",
-    promoTitle: "Kennst du schon GameFrame\u00a0–\n3\u00a0in\u00a01 Wargaming Battlefield Border?",
+    promoTitle: "Kennst du schon GameFrame\u00a0– Modular\nWargaming Battlefield Border?",
     promoText: 'Unser modularer Rahmen, optimiert für das schnelle Umbauen\nzwischen 22×30", 30×44" und 44×60" – ein Set für alle drei Formate.',
     promoFeatures: [
       ["Modular & platzsparend:", "Beschriftete Steckteile –\nflach zu verstauen, leicht zu transportieren"],
@@ -264,7 +264,7 @@ const I18N = {
       ["", "Optimierte Versionen für verschiedene Drucker –\nvom A1 mini (36 Teile) bis H2D/H2S (22 Teile)"],
     ],
     promoBtn: "GameFrame auf MakerWorld ansehen",
-    promoNote: "Die Teile aus diesem Rechner sind nicht mit GameFrame 3 in 1 kompatibel.",
+    promoNote: "Die Teile aus diesem Rechner sind nicht mit GameFrame – Modular kompatibel.",
     maxPiece: "Größtes Teil", maxAuto: "Automatisch (passend zur Druckplatte)",
     maxNote: "Du willst Teile schräg auf die Druckplatte legen?\nPrüfe im Slicer, welche Teilgröße dann noch passt, und wähle sie hier statt der automatischen Auswahl.",
     maxInfoManual: (s, mm) => `Größtes Teil (manuell festgelegt): ${s}" (${mm} mm)`,
@@ -294,7 +294,7 @@ const I18N = {
     preview: "Preview", copyLink: "🔗 Copy link", copied: "✓ Link copied",
     choosePlate: "Choose build plate …",
     resetAll: "↺ Reset all", resetConfirm: "Clear all inputs, your stock and saved print progress?", selectPrompt: "Choose at least one board size and your build plate.",
-    promoTitle: "Do you know GameFrame\u00a0–\n3\u00a0in\u00a01 Wargaming Battlefield Border?",
+    promoTitle: "Do you know GameFrame\u00a0– Modular\nWargaming Battlefield Border?",
     promoText: 'Our modular frame, optimized for quickly switching\nbetween 22×30", 30×44" and 44×60" – one set for all three formats.',
     promoFeatures: [
       ["Modular & space-saving:", "Labeled snap-together pieces –\nflat storage, easy transport"],
@@ -304,7 +304,7 @@ const I18N = {
       ["", "Optimized versions for different printers –\nfrom A1 mini (36 pieces) to H2D/H2S (22 pieces)"],
     ],
     promoBtn: "View GameFrame on MakerWorld",
-    promoNote: "The pieces from this calculator are not compatible with GameFrame 3 in 1.",
+    promoNote: "The pieces from this calculator are not compatible with GameFrame – Modular.",
     maxPiece: "Largest piece", maxAuto: "Automatic (based on build plate)",
     maxNote: "Want to place pieces diagonally on the build plate?\nCheck in your slicer which piece size still fits, and select it here instead of the automatic choice.",
     maxInfoManual: (s, mm) => `Largest piece (set manually): ${s}" (${mm} mm)`,
@@ -334,7 +334,7 @@ const I18N = {
     preview: "Aperçu", copyLink: "🔗 Copier le lien", copied: "✓ Lien copié",
     choosePlate: "Choisir le plateau …",
     resetAll: "↺ Tout réinitialiser", resetConfirm: "Effacer toutes les saisies, ton stock et la progression d'impression enregistrée ?", selectPrompt: "Choisis au moins un plateau de jeu et ton plateau d'impression.",
-    promoTitle: "Tu connais déjà GameFrame\u00a0–\n3\u00a0in\u00a01 Wargaming Battlefield Border\u00a0?",
+    promoTitle: "Tu connais déjà GameFrame\u00a0– Modular\nWargaming Battlefield Border\u00a0?",
     promoText: 'Notre cadre modulaire, optimisé pour passer rapidement\nde 22×30" à 30×44" et 44×60" – un seul set pour les trois formats.',
     promoFeatures: [
       ["Modulaire et compact :", "pièces emboîtables étiquetées –\nrangement à plat, transport facile"],
@@ -344,7 +344,7 @@ const I18N = {
       ["", "Versions optimisées pour différentes imprimantes –\nde l'A1 mini (36 pièces) à la H2D/H2S (22 pièces)"],
     ],
     promoBtn: "Voir GameFrame sur MakerWorld",
-    promoNote: "Les pièces de ce calculateur ne sont pas compatibles avec GameFrame 3 en 1.",
+    promoNote: "Les pièces de ce calculateur ne sont pas compatibles avec GameFrame – Modular.",
     maxPiece: "Plus grande pièce", maxAuto: "Automatique (selon le plateau)",
     maxNote: "Tu veux placer les pièces en diagonale sur le plateau ?\nVérifie dans ton slicer quelle taille de pièce tient encore, puis choisis-la ici à la place de la sélection automatique.",
     maxInfoManual: (s, mm) => `Plus grande pièce (définie manuellement) : ${s}" (${mm} mm)`,
@@ -374,7 +374,7 @@ const I18N = {
     preview: "Anteprima", copyLink: "🔗 Copia link", copied: "✓ Link copiato",
     choosePlate: "Scegli il piatto …",
     resetAll: "↺ Azzera tutto", resetConfirm: "Cancellare tutti i dati inseriti, il tuo inventario e l'avanzamento di stampa salvato?", selectPrompt: "Scegli almeno un campo di gioco e il piatto di stampa.",
-    promoTitle: "Conosci già GameFrame\u00a0–\n3\u00a0in\u00a01 Wargaming Battlefield Border?",
+    promoTitle: "Conosci già GameFrame\u00a0– Modular\nWargaming Battlefield Border?",
     promoText: 'La nostra cornice modulare, ottimizzata per passare rapidamente\ntra 22×30", 30×44" e 44×60" – un solo set per tutti e tre i formati.',
     promoFeatures: [
       ["Modulare e salvaspazio:", "pezzi a incastro etichettati –\nsi ripongono in piano, facili da trasportare"],
@@ -384,7 +384,7 @@ const I18N = {
       ["", "Versioni ottimizzate per diverse stampanti –\ndalla A1 mini (36 pezzi) alla H2D/H2S (22 pezzi)"],
     ],
     promoBtn: "Vedi GameFrame su MakerWorld",
-    promoNote: "I pezzi di questo calcolatore non sono compatibili con GameFrame 3 in 1.",
+    promoNote: "I pezzi di questo calcolatore non sono compatibili con GameFrame – Modular.",
     maxPiece: "Pezzo più grande", maxAuto: "Automatico (in base al piatto)",
     maxNote: "Vuoi posizionare i pezzi in diagonale sul piatto?\nControlla nello slicer quale dimensione entra ancora e selezionala qui al posto della scelta automatica.",
     maxInfoManual: (s, mm) => `Pezzo più grande (impostato manualmente): ${s}" (${mm} mm)`,
@@ -414,7 +414,7 @@ const I18N = {
     preview: "Vista previa", copyLink: "🔗 Copiar enlace", copied: "✓ Enlace copiado",
     choosePlate: "Elige la cama …",
     resetAll: "↺ Restablecer todo", resetConfirm: "¿Borrar todos los datos introducidos, tu inventario y el progreso de impresión guardado?", selectPrompt: "Elige al menos un tablero y tu cama de impresión.",
-    promoTitle: "¿Ya conoces GameFrame\u00a0–\n3\u00a0in\u00a01 Wargaming Battlefield Border?",
+    promoTitle: "¿Ya conoces GameFrame\u00a0– Modular\nWargaming Battlefield Border?",
     promoText: 'Nuestro marco modular, optimizado para cambiar rápidamente\nentre 22×30", 30×44" y 44×60": un solo set para los tres formatos.',
     promoFeatures: [
       ["Modular y compacto:", "piezas encajables etiquetadas –\nse guardan planas y se transportan fácilmente"],
@@ -424,7 +424,7 @@ const I18N = {
       ["", "Versiones optimizadas para distintas impresoras –\ndesde la A1 mini (36 piezas) hasta la H2D/H2S (22 piezas)"],
     ],
     promoBtn: "Ver GameFrame en MakerWorld",
-    promoNote: "Las piezas de esta calculadora no son compatibles con GameFrame 3 en 1.",
+    promoNote: "Las piezas de esta calculadora no son compatibles con GameFrame – Modular.",
     maxPiece: "Pieza más grande", maxAuto: "Automático (según la cama)",
     maxNote: "¿Quieres colocar las piezas en diagonal sobre la cama?\nComprueba en tu laminador qué tamaño de pieza sigue cabiendo y selecciónalo aquí en lugar de la opción automática.",
     maxInfoManual: (s, mm) => `Pieza más grande (ajustada manualmente): ${s}" (${mm} mm)`,
